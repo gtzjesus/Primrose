@@ -1,0 +1,17 @@
+extends base
+
+block content 
+    main.main 
+        .card-container
+            each product in products    
+                a.card(href=`/product/${product.slug}`)
+                    .card__header 
+                        .card__picture 
+                            img.card__picture-img(src=`/img/products/${product.imageCover}`, alt=`${product.name}`)
+                    .card__description
+                        .card__details 
+                            h4.card__sub-heading= product.name
+                            h3.card__price= `$${product.price}`
+                        .card__summary
+                            p.card__text= product.summary
+                  

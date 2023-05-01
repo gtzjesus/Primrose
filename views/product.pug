@@ -1,0 +1,71 @@
+extends base
+
+mixin reviewCard(review)
+    .reviews__card
+        .reviews__avatar 
+            img.reviews__avatar-img(src=`/img/users/${review.user.photo}`, alt=`${review.user.name}`)
+            span.reviews__user= review.user.name 
+        span.reviews__text= review.review
+        .reviews__rating
+            each star in [1,2,3,4,5]
+                svg.reviews__star(class=`reviews__star--${review.rating >= star ? 'active' : 'inactive'}` )
+                    use(xlink:href='/img/icons/icons.svg#icon-star')
+
+block content
+    section.section-header
+        .heading__box
+            span.heading__name= product.name
+            span.heading__summary= product.summary
+
+    
+    .header__hero-overlay &nbsp;
+    
+    section.carousel(aria-label='carousel' Tabindex='0')
+        .slides
+            .slides-item.slide-1(id='slide-1' aria-label='slide 1 of 4') 
+                img.header__hero-img( id='carousel__slide1'  src=`/img/products/${product.imageCover}`, alt=`${product.name}`)
+            .slides-item.slide-2(id='slide-2' aria-label='slide 2 of 4')
+                img.header__hero-img(id='carousel__slide2' src=`/img/products/${product.images[0]}`, alt=`${product.name}`)
+            .slides-item.slide-3(id='slide-3' aria-label='slide 3 of 4')
+                img.header__hero-img(id='carousel__slide3' src=`/img/products/${product.images[1]}`, alt=`${product.name}`)
+            .slides-item.slide-4(id='slide-4' aria-label='slide 4 of 4')
+                img.header__hero-img(id='carousel__slide4'  src=`/img/products/${product.images[2]}`, alt=`${product.name}`)
+        .carousel__nav 
+            a.slider-nav(href='#slide-1' aria-label='go to slide 1')
+                img.header__hero-img( id='carousel__slide1'  src=`/img/products/${product.imageCover}`, alt=`${product.name}`)
+            a.slider-nav(href='#slide-2' aria-label='go to slide 2')
+                img.header__hero-img(id='carousel__slide2' src=`/img/products/${product.images[0]}`, alt=`${product.name}`)
+            a.slider-nav(href='#slide-3' aria-label='go to slide 3')
+                img.header__hero-img(id='carousel__slide2' src=`/img/products/${product.images[1]}`, alt=`${product.name}`)
+            a.slider-nav(href='#slide-4' aria-label='go to slide 4')
+                img.header__hero-img(id='carousel__slide2' src=`/img/products/${product.images[2]}`, alt=`${product.name}`)
+
+    section.about
+        .price
+            span= `$${product.price}`
+        .description 
+            span.desc= product.description
+        .divider 
+            span= `Select size`
+        .sizes
+            button= product.sizes[0]
+            button= product.sizes[1]
+            button= product.sizes[2]
+
+    section.reviewing
+        .overall
+            h1.review__title= 'Reviews'
+            span= 'Overall rating'
+            .overall__general 
+                span.overall__average= product.ratingsAverage
+                span= '|'
+                span.overall__quantity= `${product.ratingsQuantity} Reviews`
+        .reviews
+            each review in product.reviews
+                +reviewCard(review)
+
+
+
+
+
+
