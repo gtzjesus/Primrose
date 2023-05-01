@@ -23,7 +23,7 @@ const database = process.env.DATABASE.replace(
  * MONGOOSE CONNECTION TO CLOUD DATABASE
  */
 mongoose.connect(database).then(() => {
-  console.log(`Database connection SUCCESS`);
+  // console.log(`Database connection SUCCESS`);
 });
 
 /**
@@ -31,5 +31,5 @@ mongoose.connect(database).then(() => {
  */
 const port = process.env.PORT || 7000;
 app.listen(port, () => {
-  console.log(`Listening on port: ${port}`);
+  // console.log(`Listening on port: ${port}`);
 });
