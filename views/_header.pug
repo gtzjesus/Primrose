@@ -3,8 +3,14 @@ header.header
         .logo
             a(href='/') Primrose
         .menu
-            button.mobile__nav__toggle(aria-controls='primary__navigation', aria-expanded='false')
-            nav.mobile__nav 
-                ul.primary__navigation
-                    li: a(href='#') Link
-                    a.nav__el(href='/login') Log in
+            button.mobile__nav__toggle(aria-controls='primary__navigation', aria-expanded='false', data-visible='false')
+                nav.mobile__nav 
+                    ul.primary__navigation
+                        if user
+                            a.nav__el.nav__el--logout(href='/login') Sign out
+                            a.nav__el(href='#')
+                                img.nav__user-img(src=`/img/users/${user.photo}` alt=`Photo of ${user.name}`)
+                        else 
+                            a.nav__el(href='/login') Log in
+                            a.nav__el(href='/login') Sign up 
+

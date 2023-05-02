@@ -12,6 +12,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const compression = require('compression');
+const cookieParser = require('cookie-parser');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -42,6 +43,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // BODY PARSERS (reading data from body into request.body)
 app.use(express.json({ limit: '10kb' }));
+app.use(cookieParser());
 
 // SANITIZE DATA against noSQL query injection
 app.use(mongoSanitize());
@@ -64,8 +66,60 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// COMPRESS TEXT
-app.use(compression());
+// CONTENT SECURITY POLICY
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'", 'data:', 'blob:', 'https:', 'ws:'],
+        baseUri: ["'self'"],
+        fontSrc: ["'self'", 'https:', 'data:'],
+        scriptSrc: [
+          "'self'",
+          'https:',
+          'http:',
+          'blob:',
+          'https://*.mapbox.com',
+          'https://js.stripe.com',
+          'https://m.stripe.network',
+          'https://*.cloudflare.com',
+        ],
+        frameSrc: ["'self'", 'https://js.stripe.com'],
+        objectSrc: ["'none'"],
+        styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
+        workerSrc: [
+          "'self'",
+          'data:',
+          'blob:',
+          'https://*.tiles.mapbox.com',
+          'https://api.mapbox.com',
+          'https://events.mapbox.com',
+          'https://m.stripe.network',
+        ],
+        childSrc: ["'self'", 'blob:'],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        formAction: ["'self'"],
+        connectSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          'data:',
+          'blob:',
+          'https://*.stripe.com',
+          'https://*.mapbox.com',
+          'https://*.cloudflare.com/',
+          'https://bundle.js:*',
+          'ws://127.0.0.1:*/',
+        ],
+        upgradeInsecureRequests: [],
+      },
+    },
+  })
+);
+
+app.use((request, response, next) => {
+  request.requestTime = new Date().toISOString();
+  next();
+});
 
 // USE API
 app.use('/', viewRouter);

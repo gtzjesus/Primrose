@@ -88,24 +88,22 @@ exports.signup = catchAsync(async (request, response, next) => {
  * @returns response json LOGGING IN USER
  * catchAsync HANDLES CATCHING THE ERROR
  */
-exports.login = catchAsync(async (request, response, next) => {
-  // READ BODY (DESCTRUCTURING)
-  const { email, password } = request.body;
+exports.login = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
 
-  // EMAIL/PASSWORD CHECK
+  // 1) Check if email and password exist
   if (!email || !password) {
-    return next(new AppError('Please provide email and password', 400));
+    return next(new AppError('Please provide email and password!', 400));
   }
-  // USER CHECK
-  const user = await User.findOne({ email: email }).select('+password');
+  // 2) Check if user exists && password is correct
+  const user = await User.findOne({ email }).select('+password');
 
-  // CHECK IF USER EXISTS WITH PASSWORD CHECK
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect email or password', 401));
   }
 
-  // SEND TOKEN
-  createSendToken(user, 200, response);
+  // 3) If everything ok, send token to client
+  createSendToken(user, 200, res);
 });
 
 /**
@@ -124,10 +122,13 @@ exports.protect = catchAsync(async (request, response, next) => {
     request.headers.authorization.startsWith('Bearer')
   ) {
     token = request.headers.authorization.split(' ')[1];
+    // OTHERWISE ELSE IF COOKIES
+  } else if (request.cookies.jwt) {
+    token = request.cookies.jwt;
   }
 
-  // CHECK IF TOKEN EXISTS
   if (!token) {
+    // CHECK IF TOKEN EXISTS
     return next(new AppError('Please log in to gain access!', 401));
   }
 
@@ -154,6 +155,37 @@ exports.protect = catchAsync(async (request, response, next) => {
   // SHOW CONTENT (move to next middleware/hook)
   next();
 });
+
+// ONLY FOR RENDERED PAGES, NO ERRORS
+exports.isLoggedIn = async (req, res, next) => {
+  if (req.cookies.jwt) {
+    try {
+      // 1) verify token
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+
+      // 2) Check if user still exists
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        return next();
+      }
+
+      // 3) Check if user changed password after the token was issued
+      if (currentUser.changedPasswordAfter(decoded.iat)) {
+        return next();
+      }
+
+      // THERE IS A LOGGED IN USER
+      res.locals.user = currentUser;
+      return next();
+    } catch (err) {
+      return next();
+    }
+  }
+  next();
+};
 
 /**
  * RESTRICT ROUTES FOR ADMIN USERS

@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Bebas+Neue&family=Vina+Sans&display=swap');
 * {
-  font-family: 'Bebas Neue', cursive, default sans-serif;
+  font-family: 'Bebas Neue';
   list-style: none;
   text-decoration: none;
   color: inherit;
@@ -415,6 +415,8 @@
 }
 .form__group {
   display: flex;
+  text-transform: lowercase;
+
   flex-direction: column;
   justify-content: center;
 }
