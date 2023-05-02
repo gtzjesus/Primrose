@@ -106,6 +106,14 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+exports.logout = (request, response) => {
+  response.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  response.status(200).json({ status: 'success' });
+};
+
 /**
  * PROTECT USER ROUTES
  * @param {Objecy} request

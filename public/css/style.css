@@ -16,7 +16,7 @@
   position: fixed;
   background-color: #ffff;
   width: 99vw;
-  z-index: 9999;
+  z-index: 9998;
   top: 0;
 }
 .nav {
@@ -462,17 +462,46 @@
   color: #55c57a;
   display: inline-block;
   text-decoration: none;
-  border-bottom: 1px solid #55c57a;
+  border-bottom: 1px solid #000000;
   padding: 3px;
   -webkit-transition: all 0.2s;
   transition: all 0.2s;
   cursor: pointer;
 }
 .form__upload + label:hover {
-  background-color: #55c57a;
+  background-color: #000000;
   color: #fff;
   -webkit-box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
   -webkit-transform: translateY(-2px);
   transform: translateY(-2px);
 }
+/************ ALERTS ************/
+
+.alert {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  z-index: 9999;
+  font-size: 1.8rem;
+  font-weight: 400;
+  text-align: center;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  padding: 1.6rem 15rem;
+  -webkit-box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.25);
+}
+.alert--success {
+  color: #20bf6b;
+  background-color: #000000;
+}
+
+.alert--error {
+  color: #eb4d4b;
+  background-color: #000000;
+}
+
+/************ LOG OUT ************/
