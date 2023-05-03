@@ -157,9 +157,9 @@ exports.protect = catchAsync(async (request, response, next) => {
       new AppError('User recently changed password! please log in again', 401)
     );
   }
-  // GRANT ACCESS TO PROTECTED ROUTE (in userRoutes.js)
+  // GRANT ACCESS TO ALL OTHER ROUTES)
   request.user = freshUser;
-
+  response.locals.user = freshUser;
   // SHOW CONTENT (move to next middleware/hook)
   next();
 });
