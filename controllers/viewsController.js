@@ -4,6 +4,7 @@
 
 const catchAsync = require('../utils/catchAsync');
 const Product = require('./../models/productModel');
+const AppError = require('../utils/appError');
 
 exports.getOverview = catchAsync(async (request, response, next) => {
   // GET PRODUCT DATA FROM COLLECTION
@@ -26,6 +27,10 @@ exports.getProduct = catchAsync(async (request, response, next) => {
       fields: 'review rating user images',
     }
   );
+
+  if (!product) {
+    return next(new AppError('There is no product with that name', 404));
+  }
   // BUILD TEMPLATE
 
   // RENDER TEMPLATE

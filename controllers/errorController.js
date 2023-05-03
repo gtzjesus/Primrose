@@ -36,7 +36,7 @@ const sendErrorDev = (err, req, res) => {
       stack: err.stack,
     });
   }
-
+  console.error('ERROR 💥', err);
   // B) RENDERED WEBSITE
   return res.status(err.statusCode).render('error', {
     title: 'Something went wrong!',
