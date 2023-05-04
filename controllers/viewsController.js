@@ -3,6 +3,7 @@
  */
 
 const catchAsync = require('../utils/catchAsync');
+const User = require('./../models/userModel');
 const Product = require('./../models/productModel');
 const AppError = require('../utils/appError');
 
@@ -51,3 +52,21 @@ exports.getAccount = (request, response) => {
     title: 'Your account',
   });
 };
+
+exports.updateUserData = catchAsync(async (request, response, next) => {
+  const updatedUser = await User.findByIdAndUpdate(
+    request.user.id,
+    {
+      name: request.body.name,
+      email: request.body.email,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+  response.status(200).render('account', {
+    title: 'Your account',
+    user: updatedUser,
+  });
+});

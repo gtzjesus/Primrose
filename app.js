@@ -43,6 +43,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // BODY PARSERS (reading data from body into request.body)
 app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
 // SANITIZE DATA against noSQL query injection
@@ -79,7 +80,6 @@ app.use(
           'https:',
           'http:',
           'blob:',
-          'https://*.mapbox.com',
           'https://js.stripe.com',
           'https://m.stripe.network',
           'https://*.cloudflare.com',
@@ -87,15 +87,7 @@ app.use(
         frameSrc: ["'self'", 'https://js.stripe.com'],
         objectSrc: ["'none'"],
         styleSrc: ["'self'", 'https:', "'unsafe-inline'"],
-        workerSrc: [
-          "'self'",
-          'data:',
-          'blob:',
-          'https://*.tiles.mapbox.com',
-          'https://api.mapbox.com',
-          'https://events.mapbox.com',
-          'https://m.stripe.network',
-        ],
+        workerSrc: ["'self'", 'data:', 'blob:', 'https://m.stripe.network'],
         childSrc: ["'self'", 'blob:'],
         imgSrc: ["'self'", 'data:', 'blob:'],
         formAction: ["'self'"],
@@ -105,7 +97,6 @@ app.use(
           'data:',
           'blob:',
           'https://*.stripe.com',
-          'https://*.mapbox.com',
           'https://*.cloudflare.com/',
           'https://bundle.js:*',
           'ws://127.0.0.1:*/',
