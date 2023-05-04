@@ -5,11 +5,56 @@
  */
 
 // IMPORTS
+const multer = require('multer');
+const sharp = require('sharp');
 const User = require('./../models/userModel');
 const APIFeatures = require('../utils/APIfeatures');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('../utils/appError');
 const factory = require('./handlerFactory');
+
+// const multerStorage = multer.diskStorage({
+//   destination: (request, file, callback) => {
+//     callback(null, 'public/img/users');
+//   },
+//   filename: (request, file, callback) => {
+//     // user-id-timestamp.file-extension
+//     const ext = file.mimetype.split('/')[1];
+//     callback(null, `user-${request.user.id}-${Date.now()}.${ext}`);
+//   },
+// });
+// STORE IMAGE AT BUFFER
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (request, file, callback) => {
+  if (file.mimetype.startsWith('image')) {
+    callback(null, true);
+  } else {
+    callback(new AppError('Not an image!', 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+// UPLOADING USER PHOTO
+exports.uploadUserPhoto = upload.single('photo');
+
+// IMAGE PROCESSING
+exports.resizeUserPhoto = (request, response, next) => {
+  if (!request.file) return next();
+
+  request.file.filename = `user-${request.user.id}-${Date.now()}.jpeg`;
+
+  sharp(request.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/users/${request.file.filename}`);
+
+  next();
+};
 
 /**
  * FILTER OBJECT FOR UPDATING (only name and email)
@@ -46,6 +91,7 @@ exports.updateMe = catchAsync(async (request, response, next) => {
 
   // FILTER OUT UNWANTED FIELD NAMES (admin, password)
   const filteredBody = filterObject(request.body, 'name', 'email');
+  if (request.file) filteredBody.photo = request.file.filename;
 
   // UPDATE USER DOCUMENT
   const updatedUser = await User.findByIdAndUpdate(
