@@ -10,6 +10,7 @@ const sharp = require('sharp');
 const AppError = require('../utils/appError');
 const Product = require('./../models/productModel');
 const factory = require('./handlerFactory');
+const catchAsync = require('../utils/catchAsync');
 
 // STORE IMAGE AT BUFFER
 const multerStorage = multer.memoryStorage();
@@ -34,10 +35,42 @@ exports.uploadProductImages = upload.fields([
 
 // upload.array('images', 5);
 
-exports.resizeProductImages = (request, response, next) => {
-  console.log(request.files);
+exports.resizeProductImages = catchAsync(async (request, response, next) => {
+  if (!request.files || !request.files.images) return next();
+
+  // COVER IMAGE
+  request.body.imageCover = `product-${
+    request.params.id
+  }-${Date.now()}-cover.jpeg`;
+
+  await sharp(request.files.imageCover[0].buffer)
+    .resize(1333, 2000)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/products/${request.body.imageCover}`);
+
+  // OTHER IMAGES
+  request.body.images = [];
+
+  await Promise.all(
+    request.files.images.map(async (file, i) => {
+      const filename = `product-${request.params.id}-${Date.now()}-${
+        i + 1
+      }.jpeg`;
+
+      await sharp(file.buffer)
+        .resize(1333, 2000)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+        .toFile(`public/img/products/${filename}`);
+
+      request.body.images.push(filename);
+    })
+  );
+  console.log(request.body);
   next();
-};
+});
+
 exports.getProductStats = catchAsync(async (req, res, next) => {
   const stats = await Product.aggregate([
     {
