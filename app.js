@@ -107,6 +107,7 @@ app.use(
   })
 );
 
+// TESTING
 app.use((request, response, next) => {
   request.requestTime = new Date().toISOString();
   next();

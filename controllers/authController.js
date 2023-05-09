@@ -10,7 +10,7 @@ const User = require('./../models/userModel');
 const jwt = require('jsonwebtoken');
 const AppError = require('./../utils/appError');
 const catchAsync = require('../utils/catchAsync');
-const sendEmail = require('./../utils/email');
+const Email = require('./../utils/email');
 
 /**
  * CREATE SIGNATURE JSON WEB TOKEN FOR AUTH
@@ -77,6 +77,10 @@ exports.signup = catchAsync(async (request, response, next) => {
     passwordConfirm: request.body.passwordConfirm,
     role: request.body.role,
   });
+  const url = `${request.protocol}://${request.get('host')}/me`;
+  console.log(url);
+  // SEND EMAIL
+  await new Email(newUser, url).sendWelcome();
   createSendToken(newUser, 201, response);
 });
 
@@ -245,12 +249,12 @@ exports.forgotPassword = catchAsync(async (request, response, next) => {
   // CONTRUCT EMAIL MESSAGE
   const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to : ${resetURL}.\nIf you did not forget password, please ignore this email`;
   try {
-    // SEND EMAIL
-    await sendEmail({
-      email: request.body.email,
-      subject: 'Your password reset token (valid for 10 min)',
-      message,
-    });
+    // // SEND EMAIL
+    // await sendEmail({
+    //   email: request.body.email,
+    //   subject: 'Your password reset token (valid for 10 min)',
+    //   message,
+    // });
 
     // SEND RESPONSE, OTHERWISE IT WILL NEVER FINISH
     response.status(200).json({
