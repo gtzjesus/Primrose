@@ -240,21 +240,14 @@ exports.forgotPassword = catchAsync(async (request, response, next) => {
 
   // TURN OFF VALIDATION
   await user.save({ validateBeforeSave: false });
-
-  // SEND TOKEN TO USER'S EMAIL
-  const resetURL = `${request.protocol}://${request.get(
-    'host'
-  )}/api/users/resetPassword/${resetToken}`;
-
-  // CONTRUCT EMAIL MESSAGE
-  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to : ${resetURL}.\nIf you did not forget password, please ignore this email`;
   try {
-    // // SEND EMAIL
-    // await sendEmail({
-    //   email: request.body.email,
-    //   subject: 'Your password reset token (valid for 10 min)',
-    //   message,
-    // });
+    // SEND TOKEN TO USER'S EMAIL
+    const resetURL = `${request.protocol}://${request.get(
+      'host'
+    )}/api/users/resetPassword/${resetToken}`;
+
+    // // SEND RESET PASSWORD EMAIL
+    await new Email(user, resetURL).sendPasswordReset();
 
     // SEND RESPONSE, OTHERWISE IT WILL NEVER FINISH
     response.status(200).json({
