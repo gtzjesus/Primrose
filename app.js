@@ -19,6 +19,7 @@ const globalErrorHandler = require('./controllers/errorController');
 const productRouter = require('./routes/productRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const bookingRouter = require('./routes/bookingRoutes');
 const viewRouter = require('./routes/viewRoutes');
 
 // CREATE APPLICATION
@@ -118,6 +119,7 @@ app.use('/', viewRouter);
 app.use('/api/products', productRouter);
 app.use('/api/users', userRouter);
 app.use('/api/reviews', reviewRouter);
+app.use('/api/bookings', bookingRouter);
 
 /**
  * HANDLE URL's API THAT DO NOT MATCH
