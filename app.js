@@ -37,6 +37,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // SET SECURITY HTTP HEADERS
 app.use(helmet());
 
+// STRIPE ERR_RESPONSE SOLUTION
+app.use(helmet.crossOriginEmbedderPolicy({ policy: 'credentialless' }));
+
 // CHECK NODE ENVIRONMENT (production/development)
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -105,6 +108,7 @@ app.use(
         upgradeInsecureRequests: [],
       },
     },
+    crossOriginEmbedderPolicy: { policy: 'credentialless' },
   })
 );
 
