@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema(
         'A product name must have less or equal then 40 characters',
       ],
       minlength: [
-        5,
+        3,
         'A product name must have more or equal then 10 characters',
       ],
     },
@@ -45,14 +45,6 @@ const productSchema = new mongoose.Schema(
     quantity: {
       type: Number,
       required: [true, 'A product must have a quantity'],
-    },
-    sizes: {
-      type: [String],
-      required: [true, 'A product must have a size'],
-      enum: {
-        values: ['s', 'm', 'l'],
-        message: 'Sizes are either: s, m, l',
-      },
     },
     summary: {
       type: String,
