@@ -6,8 +6,8 @@
 // IMPORTS
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Product = require('./../models/productModel');
+const Booking = require('./../models/bookingModel');
 const factory = require('./handlerFactory');
-const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 
 exports.getCheckoutSession = catchAsync(async (req, res, next) => {
@@ -36,7 +36,9 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   // 2) Create checkout session
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
-    success_url: `${req.protocol}://${req.get('host')}/`,
+    success_url: `${req.protocol}://${req.get('host')}/?product=${
+      req.params.productId
+    }&user=${req.user.id}&price=${product.price}`,
     cancel_url: `${req.protocol}://${req.get('host')}/product/${product.slug}`,
     customer_email: req.user.email,
     client_reference_id: req.params.productId, //this field allows us to pass in some data about this session that we are currently creating.
@@ -49,4 +51,14 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     status: 'success',
     session,
   });
+});
+
+exports.createBookingCheckout = catchAsync(async (req, res, next) => {
+  // TEMPORARY SOLUTION (UNSECURE/ACCESSABLE TO PURCHASES WITHOUT PAYING)
+  const { product, user, price } = req.query;
+  if (!product && !user && !price) return next();
+  await Booking.create({ product, user, price });
+
+  // CREATES ARRAY IN QUERY // ROUTE URL(homepage)
+  res.redirect(req.originalUrl.split('?'[0]));
 });
