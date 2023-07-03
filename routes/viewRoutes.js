@@ -22,6 +22,12 @@ router.get(
 router.get('/login', authController.isLoggedIn, viewsController.getLoginForm);
 router.get('/me', authController.protect, viewsController.getAccount);
 
+router.get(
+  '/my-products',
+  authController.protect,
+  viewsController.getMyProducts
+);
+
 router.post(
   '/submit-user-data',
   authController.protect,

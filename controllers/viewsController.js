@@ -4,8 +4,10 @@
 
 const catchAsync = require('../utils/catchAsync');
 const User = require('./../models/userModel');
+const Bookings = require('./../models/bookingModel');
 const Product = require('./../models/productModel');
 const AppError = require('../utils/appError');
+const Booking = require('./../models/bookingModel');
 
 exports.getOverview = catchAsync(async (request, response, next) => {
   // GET PRODUCT DATA FROM COLLECTION
@@ -52,6 +54,20 @@ exports.getAccount = (request, response) => {
     title: 'Your account',
   });
 };
+
+exports.getMyProducts = catchAsync(async (request, response, next) => {
+  // FIND ALL PRODUCTS
+  const bookings = await Booking.find({ user: request.user.id });
+
+  // FIND PRODUCTS W/ RETURNED IDs
+  const productIDs = bookings.map((element) => element.product);
+  const products = await Product.find({ _id: { $in: productIDs } });
+
+  response.status(200).render('overview', {
+    title: 'My Products',
+    products,
+  });
+});
 
 exports.updateUserData = catchAsync(async (request, response, next) => {
   const updatedUser = await User.findByIdAndUpdate(

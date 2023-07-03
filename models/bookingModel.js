@@ -33,6 +33,7 @@ bookingSchema.pre(/^find/, function (next) {
     path: 'product',
     select: 'name',
   });
+  next();
 });
 
 const Booking = mongoose.model('Booking', bookingSchema);
