@@ -34,6 +34,9 @@ app.set('views', path.join(__dirname, 'views'));
 // SERVE STATIC FILES
 app.use(express.static(path.join(__dirname, 'public')));
 
+// READY FOR DEPLOYMENT
+app.use(compression());
+
 // SET SECURITY HTTP HEADERS
 app.use(helmet());
 

@@ -9,10 +9,8 @@ export const bookProduct = async (productId) => {
 
   try {
     // GET SESSION FROM SERVER (with a route onto client side)
-    const session = await axios(
-      `http://127.0.0.1:7000/api/bookings/checkout-session/${productId}`
-    );
-    console.log(session);
+    const session = await axios(`/api/bookings/checkout-session/${productId}`);
+    // console.log(session);
 
     // USE STRIPE OBJECT TO AUTO-CREATE CHECKOUT + CHARGE CARDS
     // await stripe.redirectToCheckout({

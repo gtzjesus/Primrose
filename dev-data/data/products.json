@@ -1,27 +1,14 @@
 [
   {
     "_id": "5c88fa8cf4afda39709c2955",
-    "name": "DK OG Barrel",
+    "name": "DK Barrel",
     "quantity": 5,
     "leads": ["5c8a22c62f8fb814b56fa18b", "5c8a1f4e2f8fb814b56fa185"],
-    "price": 44.99,
+    "price": 29.99,
     "summary": "Bestseller",
     "description": "DK Barrel",
     "imageCover": "dk_front.png",
     "images": ["dk_product_one.png", "dk_product_two.png", "dk_last.png"],
-    "ratingsAverage": 4.8,
-    "ratingsQuantity": 6
-  },
-  {
-    "_id": "5c88fa8cf4afda39709c295a",
-    "name": "DK Rose Gold Barrel",
-    "quantity": 5,
-    "leads": ["5c8a22c62f8fb814b56fa18b", "5c8a1f4e2f8fb814b56fa185"],
-    "price": 9.99,
-    "summary": "Rosegold",
-    "description": "DK Barrel",
-    "imageCover": "dk_front_rose.png",
-    "images": ["dk_first_rose.png", "dk_second_rose.png", "dk_third_rose.png"],
     "ratingsAverage": 4.7,
     "ratingsQuantity": 3
   }

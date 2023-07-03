@@ -67,7 +67,7 @@ exports.resizeProductImages = catchAsync(async (request, response, next) => {
       request.body.images.push(filename);
     })
   );
-  console.log(request.body);
+  // console.log(request.body);
   next();
 });
 

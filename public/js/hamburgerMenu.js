@@ -3,7 +3,7 @@ const navigationToggle = document.querySelector('.mobile__nav__toggle');
 
 navigationToggle.addEventListener('click', function () {
   const visibility = primaryNavigation.getAttribute('data-visible');
-  console.log(visibility);
+  // console.log(visibility);
 
   if (visibility === 'false') {
     primaryNavigation.setAttribute('data-visible', true);
