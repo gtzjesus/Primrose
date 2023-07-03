@@ -29,7 +29,10 @@ mongoose.connect(database).then(() => {
 /**
  * PORT CONNECTION WITH WEB SERVER
  */
-const port = process.env.PORT || 7000;
-app.listen(port, () => {
-  // console.log(`Listening on port: ${port}`);
+const port = process.env.PORT || 3000;
+hostname = '0.0.0.0';
+
+//4) START OF SERVER
+const server = app.listen(port, hostname, () => {
+  console.log(`App is running on port ${port}`);
 });
