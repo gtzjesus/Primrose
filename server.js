@@ -1,38 +1,44 @@
-/**
- * WEB SERVER CONNECTION &&
- * DATABASE CONNECTION (ATLAS-CLOUD-BASED)
- */
-
-// IMPORTS
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+
+process.on('uncaughtException', (err) => {
+  console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
+  console.log(err.name, err.message);
+  process.exit(1);
+});
+
 dotenv.config({ path: './config.env' });
 const app = require('./app');
 
-/**
- * DATABASE MANIPULATION FOR OUR
- * PASSWORD INTEGRATION
- * @returns DATABASE COMPLETE ADDRESS
- */
-const database = process.env.DATABASE.replace(
+const DB = process.env.DATABASE.replace(
   '<PASSWORD>',
   process.env.DATABASE_PASSWORD
 );
 
-/**
- * MONGOOSE CONNECTION TO CLOUD DATABASE
- */
-mongoose.connect(database).then(() => {
-  // console.log(`Database connection SUCCESS`);
+mongoose
+  .connect(DB, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+  })
+  .then(() => console.log('DB connection successful!'));
+
+const port = process.env.PORT || 7000;
+const server = app.listen(port, () => {
+  console.log(`App running on port ${port}...`);
 });
 
-/**
- * PORT CONNECTION WITH WEB SERVER
- */
-const port = process.env.PORT || 3000;
-hostname = '0.0.0.0';
+process.on('unhandledRejection', (err) => {
+  console.log('UNHANDLED REJECTION! 💥 Shutting down...');
+  console.log(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
+  });
+});
 
-//4) START OF SERVER
-const server = app.listen(port, hostname, () => {
-  console.log(`App is running on port ${port}`);
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+  server.close(() => {
+    console.log('💥 Process terminated!');
+  });
 });
