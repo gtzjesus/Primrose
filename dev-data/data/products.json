@@ -1,7 +1,7 @@
 [
   {
     "_id": "5c88fa8cf4afda39709c2955",
-    "name": "DK Barrel",
+    "name": "DK Barrel Adult",
     "quantity": 5,
     "leads": ["5c8a22c62f8fb814b56fa18b", "5c8a1f4e2f8fb814b56fa185"],
     "price": 29.99,
@@ -10,6 +10,23 @@
     "imageCover": "dk_front.png",
     "images": ["dk_product_one.png", "dk_product_two.png", "dk_last.png"],
     "ratingsAverage": 4.7,
-    "ratingsQuantity": 3
+    "ratingsQuantity": 2
+  },
+  {
+    "_id": "5c88fa8cf4afda39709c2955",
+    "name": "DK Barrel",
+    "quantity": 5,
+    "leads": ["5c8a22c62f8fb814b56fa18b", "5c8a1f4e2f8fb814b56fa185"],
+    "price": 9.99,
+    "summary": "",
+    "description": "DK Barrel",
+    "imageCover": "dk_front_small.png",
+    "images": [
+      "dk_product_one_small.png",
+      "dk_product_two_small.png",
+      "dk_last_small.png"
+    ],
+    "ratingsAverage": 4.7,
+    "ratingsQuantity": 2
   }
 ]

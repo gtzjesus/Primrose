@@ -68,7 +68,7 @@ const filterObject = (object, ...allowedFields) => {
   Object.keys(object).forEach((element) => {
     if (allowedFields.includes(element)) newObject[element] = object[element];
   });
-  // RETURN NEW OBJECT
+
   return newObject;
 };
 
