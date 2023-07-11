@@ -1,11 +1,11 @@
 [
   {
     "_id": "5c88fa8cf4afda39709c2955",
-    "name": "DK Barrel Adult",
+    "name": "DK Barrel Large",
     "quantity": 5,
     "leads": ["5c8a22c62f8fb814b56fa18b", "5c8a1f4e2f8fb814b56fa185"],
     "price": 29.99,
-    "summary": "Bestseller",
+    "summary": "Best Seller",
     "description": "DK Barrel",
     "imageCover": "dk_front.png",
     "images": ["dk_product_one.png", "dk_product_two.png", "dk_last.png"],
@@ -13,8 +13,8 @@
     "ratingsQuantity": 2
   },
   {
-    "_id": "5c88fa8cf4afda39709c2955",
-    "name": "DK Barrel",
+    "_id": "5c88fa8cf4afda39709c295a",
+    "name": "DK Barrel Mini",
     "quantity": 5,
     "leads": ["5c8a22c62f8fb814b56fa18b", "5c8a1f4e2f8fb814b56fa185"],
     "price": 9.99,
@@ -25,6 +25,40 @@
       "dk_product_one_small.png",
       "dk_product_two_small.png",
       "dk_last_small.png"
+    ],
+    "ratingsAverage": 4.7,
+    "ratingsQuantity": 2
+  },
+  {
+    "_id": "5c88fa8cf4afda39709c295b",
+    "name": "DK Barrel Gold",
+    "quantity": 5,
+    "leads": ["5c8a22c62f8fb814b56fa18b", "5c8a1f4e2f8fb814b56fa185"],
+    "price": 9.99,
+    "summary": "Online Exclusive",
+    "description": "DK Barrel",
+    "imageCover": "dk_front_gold.png",
+    "images": [
+      "dk_product_one_gold.png",
+      "dk_product_two_gold.png",
+      "dk_last_gold.png"
+    ],
+    "ratingsAverage": 4.7,
+    "ratingsQuantity": 2
+  },
+  {
+    "_id": "5c88fa8cf4afda39709c295c",
+    "name": "DK Barrel Keychain",
+    "quantity": 5,
+    "leads": ["5c8a22c62f8fb814b56fa18b", "5c8a1f4e2f8fb814b56fa185"],
+    "price": 4.99,
+    "summary": "",
+    "description": "DK Barrel",
+    "imageCover": "dk_front_keychain.png",
+    "images": [
+      "dk_product_one_keychain.png",
+      "dk_product_two_keychain.png",
+      "dk_last_keychain.png"
     ],
     "ratingsAverage": 4.7,
     "ratingsQuantity": 2
