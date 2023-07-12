@@ -13,6 +13,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -30,6 +31,13 @@ app.enable('trust proxy');
 
 // DEFINE ENGINE
 app.set('view engine', 'pug');
+
+// CORS IMPLEMENTATION (ACCESS-CONTROL-ALLOW-ORIGIN *)
+// ALLOWS EVERYONE TO CONSUME OUR API
+app.use(cors());
+
+// SUCH AS .get .delete .patch (ANOTHER HTTP METHOD)
+app.options('*', cors());
 
 // LOCATE VIEW (we dont know if path has slash /
 app.set('views', path.join(__dirname, 'views'));
