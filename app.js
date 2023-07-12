@@ -25,6 +25,9 @@ const viewRouter = require('./routes/viewRoutes');
 // CREATE APPLICATION
 const app = express();
 
+// EXPRESS TRUSTING PROXIES (TESTING IF CONNECTION IS SECURE IN HEROKU)
+app.enable('trust proxy');
+
 // DEFINE ENGINE
 app.set('view engine', 'pug');
 

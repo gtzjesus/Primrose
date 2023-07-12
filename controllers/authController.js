@@ -11,6 +11,7 @@ const jwt = require('jsonwebtoken');
 const AppError = require('./../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const Email = require('./../utils/email');
+const { request } = require('http');
 
 /**
  * CREATE SIGNATURE JSON WEB TOKEN FOR AUTH
@@ -29,21 +30,23 @@ const signToken = (id) => {
  * @param {String} id
  * @returns response JSON
  */
-const createSendToken = (user, statusCode, response) => {
+const createSendToken = (user, statusCode, request, response) => {
   // CREATE TOKEN & SEND TO CLIENT
   const token = signToken(user._id);
 
   // CREATE COOKIES
-  const cookieOptions = {
+  request.cookie('jwt', token, {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     // ONLY HTTPS
     // (cookie not accessed by browser, only receive/store/send)
     httpOnly: true,
-  };
-
-  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+    secure: request.secure || request.headers('x-forwarded-proto') === 'https',
+  });
+  if (process.env.NODE_ENV === 'production')
+    // IN PRODUCTION COOKIE TO SECURE
+    cookieOptions.secure = true;
 
   // CREATE COOKIE (convert to milliseconds)
   response.cookie('jwt', token, cookieOptions);
@@ -81,7 +84,7 @@ exports.signup = catchAsync(async (request, response, next) => {
   // console.log(url);
   // SEND EMAIL
   await new Email(newUser, url).sendWelcome();
-  createSendToken(newUser, 201, response);
+  createSendToken(newUser, 201, request, response);
 });
 
 /**
@@ -107,7 +110,7 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   // 3) If everything ok, send token to client
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, request, res);
 });
 
 exports.logout = (request, response) => {
@@ -301,7 +304,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   // UPDATE changePasswordAt attribure
   // LOG USER IN, SEND WEB TOKEN
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, request, res);
 });
 
 /**
@@ -327,7 +330,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   await user.save();
 
   // LOG USER IN, SEND WEB TOKEN
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, request, res);
 });
 
 /**
@@ -355,5 +358,5 @@ exports.updatePassword = catchAsync(async (request, response, next) => {
   await user.save();
 
   // LOG USER IN, SEND WEB TOKENS
-  createSendToken(user, 200, response);
+  createSendToken(user, 200, request, response);
 });
