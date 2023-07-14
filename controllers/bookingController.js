@@ -11,6 +11,7 @@ const factory = require('./handlerFactory');
 const catchAsync = require('../utils/catchAsync');
 const User = require('../models/userModel');
 
+// MIDDLEWARE USED TO RECEIVE PAYMENT FROM STRIPE
 exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   // 1) Get the currently booked product
   const product = await Product.findById(req.params.productId);
@@ -50,18 +51,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     session,
   });
 });
-
-// DEVELOPMENT MIIDLEWARE
-// exports.createBookingCheckout = catchAsync(async (req, res, next) => {
-//   // TEMPORARY SOLUTION (UNSECURE/ACCESSABLE TO PURCHASES WITHOUT PAYING)
-//   const { product, user, price } = req.query;
-//   if (!product && !user && !price) return next();
-//   await Booking.create({ product, user, price });
-
-//   // CREATES ARRAY IN QUERY // ROUTE URL(homepage)
-//   res.redirect(req.originalUrl.split('?'[0]));
-// });
-// PRODUCTION REGULAR FUNCTION
+// PRODUCTION FUNCTION; CREATE THAT PURCHASE/BOOKING
 const createBookingCheckout = async (session) => {
   const product = session.client_reference_id;
   const user = (await User.findOne({ email: session.customer_email })).id;
@@ -69,6 +59,7 @@ const createBookingCheckout = async (session) => {
   await Booking.create({ product, user, price });
 };
 
+// STRIPE WEBOOK TO CREATE PURCHASE, FROM OUR FRONTEND
 exports.webhookCheckout = (req, res, next) => {
   // ADDS HEADER TO REQUEST, CONTAINING SIGNATURE TO WEBHOOK (from stripe doc)
   const signature = req.headers['stripe-signature'];
@@ -88,7 +79,7 @@ exports.webhookCheckout = (req, res, next) => {
   if (event.type === 'checkout.session.completed')
     // CREATE STRIPE EVENT
     createBookingCheckout(event.data.object);
-
+  //  SEND CONFIRMATION
   res.status(200).json({ received: true });
 };
 
