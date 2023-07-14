@@ -1,106 +1,90 @@
-const AppError = require('./../utils/appError');
+/**
+ * CONTROLLER LOGIC WHERE MANIPULATION
+ * HAPPENS FOR ALL BOOKINGS (exports)
+ */
 
-const handleCastErrorDB = (err) => {
-  const message = `Invalid ${err.path}: ${err.value}.`;
-  return new AppError(message, 400);
-};
+// IMPORTS
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const Product = require('./../models/productModel');
+const Booking = require('./../models/bookingModel');
+const factory = require('./handlerFactory');
+const catchAsync = require('../utils/catchAsync');
+const User = require('../models/userModel');
 
-const handleDuplicateFieldsDB = (err) => {
-  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
-  // console.log(value);
+// MIDDLEWARE USED TO RECEIVE PAYMENT FROM STRIPE
+exports.getCheckoutSession = catchAsync(async (req, res, next) => {
+  // 1) Get the currently booked product
+  const product = await Product.findById(req.params.productId);
 
-  const message = `Duplicate field value: ${value}. Please use another value!`;
-  return new AppError(message, 400);
-};
-
-const handleValidationErrorDB = (err) => {
-  const errors = Object.values(err.errors).map((el) => el.message);
-
-  const message = `Invalid input data. ${errors.join('. ')}`;
-  return new AppError(message, 400);
-};
-
-const handleJWTError = () =>
-  new AppError('Invalid token. Please log in again!', 401);
-
-const handleJWTExpiredError = () =>
-  new AppError('Your token has expired! Please log in again.', 401);
-
-const sendErrorDev = (err, req, res) => {
-  // A) API
-  if (req.originalUrl.startsWith('/api')) {
-    return res.status(err.statusCode).json({
-      status: err.status,
-      error: err,
-      message: err.message,
-      stack: err.stack,
-    });
-  }
-  console.error('ERROR 💥', err);
-  // B) RENDERED WEBSITE
-  return res.status(err.statusCode).render('error', {
-    title: 'Something went wrong!',
-    msg: err.message,
+  // 2) Create checkout session
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    success_url: `${req.protocol}://${req.get('host')}/my-products`,
+    // success_url: `${req.protocol}://${req.get('host')}/my-products`,
+    cancel_url: `${req.protocol}://${req.get('host')}/product/${product.slug}`,
+    customer_email: req.user.email,
+    client_reference_id: req.params.productId, //this field allows us to pass in some data about this session that we are currently creating.
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: 'usd',
+          unit_amount: product.price * 100,
+          product_data: {
+            name: `${product.name} product`,
+            description: product.description, //description here
+            images: [
+              `${req.protocol}://${req.get('host')}/img/products/${
+                product.imageCover
+              }`,
+            ], //only accepts live images (images hosted on the internet),
+          },
+        },
+      },
+    ],
+    mode: 'payment',
   });
-};
 
-const sendErrorProd = (err, req, res) => {
-  // A) API
-  if (req.originalUrl.startsWith('/api')) {
-    // A) Operational, trusted error: send message to client
-    if (err.isOperational) {
-      return res.status(err.statusCode).json({
-        status: err.status,
-        message: err.message,
-      });
-    }
-    // B) Programming or other unknown error: don't leak error details
-    // 1) Log error
-    console.error('ERROR 💥', err);
-    // 2) Send generic message
-    return res.status(500).json({
-      status: 'error',
-      message: 'Something went very wrong!',
-    });
-  }
-
-  // B) RENDERED WEBSITE
-  // A) Operational, trusted error: send message to client
-  if (err.isOperational) {
-    // console.log(err);
-    return res.status(err.statusCode).render('error', {
-      title: 'Something went wrong!',
-      msg: err.message,
-    });
-  }
-  // B) Programming or other unknown error: don't leak error details
-  // 1) Log error
-  // 2) Send generic message
-  return res.status(err.statusCode).render('error', {
-    title: 'Something went wrong!',
-    msg: 'Please try again later.',
+  // 3) Create session as response
+  res.status(200).json({
+    status: 'success',
+    session,
   });
+});
+// PRODUCTION FUNCTION; CREATE THAT PURCHASE/BOOKING
+const createBookingCheckout = async (session) => {
+  const product = session.client_reference_id;
+  const user = (await User.findOne({ email: session.customer_email })).id;
+  const price = session.line_items[0].unit_amount / 100;
+  await Booking.create({ product, user, price });
 };
 
-module.exports = (err, req, res, next) => {
-  // console.log(err.stack);
+// STRIPE WEBOOK TO CREATE PURCHASE, FROM OUR FRONTEND
+exports.webhookCheckout = (req, res, next) => {
+  // ADDS HEADER TO REQUEST, CONTAINING SIGNATURE TO WEBHOOK (from stripe doc)
+  const signature = req.headers['stripe-signature'];
+  let event;
 
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
-
-  if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, req, res);
-  } else if (process.env.NODE_ENV === 'production') {
-    let error = Object.assign(err);
-    error.message = err.message;
-
-    if (error.name === 'CastError') error = handleCastErrorDB(error);
-    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
-    if (error.name === 'ValidationError')
-      error = handleValidationErrorDB(error);
-    if (error.name === 'JsonWebTokenError') error = handleJWTError();
-    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
-
-    sendErrorProd(error, req, res);
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    return res.status(400).send(`Webhook error : ${err.message}`);
   }
+
+  // TEST IF IT IS EVENT
+  if (event.type === 'checkout.session.completed')
+    // CREATE STRIPE EVENT
+    createBookingCheckout(event.data.object);
+  //  SEND CONFIRMATION
+  res.status(200).json({ received: true });
 };
+
+exports.createBooking = factory.createOne(Booking);
+exports.getBooking = factory.getOne(Booking);
+exports.getAllBookings = factory.getAll(Booking);
+exports.updateBooking = factory.updateOne(Booking);
+exports.deleteBooking = factory.deleteOne(Booking);

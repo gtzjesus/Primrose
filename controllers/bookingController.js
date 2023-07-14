@@ -26,23 +26,18 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     client_reference_id: req.params.productId, //this field allows us to pass in some data about this session that we are currently creating.
     line_items: [
       {
+        name: `${product.name} Product`,
+        description: product.description,
+        images: [
+          `${req.protocol}://${req.get('host')}/img/products/${
+            product.imageCover
+          }`,
+        ],
+        amount: product.price * 100,
+        currency: 'usd',
         quantity: 1,
-        price_data: {
-          currency: 'usd',
-          unit_amount: product.price * 100,
-          product_data: {
-            name: `${product.name} product`,
-            description: product.description, //description here
-            images: [
-              `${req.protocol}://${req.get('host')}/img/products/${
-                product.imageCover
-              }`,
-            ], //only accepts live images (images hosted on the internet),
-          },
-        },
       },
     ],
-    mode: 'payment',
   });
 
   // 3) Create session as response
@@ -55,7 +50,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
 const createBookingCheckout = async (session) => {
   const product = session.client_reference_id;
   const user = (await User.findOne({ email: session.customer_email })).id;
-  const price = session.line_items[0].unit_amount / 100;
+  const price = session.line_items[0].amount / 100;
   await Booking.create({ product, user, price });
 };
 
