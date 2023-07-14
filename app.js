@@ -21,6 +21,8 @@ const productRouter = require('./routes/productRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
+const bookingController = require('./controllers/bookingController');
+
 const viewRouter = require('./routes/viewRoutes');
 
 // CREATE APPLICATION
@@ -59,6 +61,21 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+// RATE REQUEST LIMITING
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again in an hour',
+});
+app.use('/api', limiter);
+
+// NOT IN JSON BUT IN RAW
+app.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout
+);
+
 // BODY PARSERS (reading data from body into request.body)
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
@@ -76,14 +93,6 @@ app.use(
     whitelist: ['duration'],
   })
 );
-
-// RATE REQUEST LIMITING
-const limiter = rateLimit({
-  max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: 'Too many requests from this IP, please try again in an hour',
-});
-app.use('/api', limiter);
 
 // CONTENT SECURITY POLICY
 app.use(
