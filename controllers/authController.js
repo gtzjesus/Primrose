@@ -110,7 +110,7 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   // 3) If everything ok, send token to client
-  createSendToken(user, 200, request, res);
+  createSendToken(user, 200, req, res);
 });
 
 exports.logout = (request, response) => {
