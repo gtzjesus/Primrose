@@ -47,9 +47,6 @@ app.set('views', path.join(__dirname, 'views'));
 // SERVE STATIC FILES
 app.use(express.static(path.join(__dirname, 'public')));
 
-// READY FOR DEPLOYMENT
-app.use(compression());
-
 // SET SECURITY HTTP HEADERS
 app.use(helmet());
 
@@ -90,9 +87,19 @@ app.use(xss());
 // PREVENT PARAMETER POLLUTION (clear query string)
 app.use(
   hpp({
-    whitelist: ['duration'],
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price',
+    ],
   })
 );
+
+// COMPRESS FILES
+app.use(compression());
 
 // CONTENT SECURITY POLICY
 app.use(
@@ -157,7 +164,7 @@ app.all('*', (request, response, next) => {
 });
 
 // HANDLE ERRORS GLOBALLY
-app.use(globalErrorHandler);
+// app.use(globalErrorHandler);
 
 // EXPORT MODULE
 module.exports = app;
