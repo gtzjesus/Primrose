@@ -35,7 +35,7 @@ const createSendToken = (user, statusCode, request, response) => {
   const token = signToken(user._id);
 
   // CREATE COOKIES
-  request.cookie('jwt', token, {
+  response.cookie('jwt', token, {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
