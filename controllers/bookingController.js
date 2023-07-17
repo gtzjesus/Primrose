@@ -24,7 +24,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     cancel_url: `${req.protocol}://${req.get('host')}/product/${product.slug}`,
     customer_email: req.user.email,
     client_reference_id: req.params.productId, //this field allows us to pass in some data about this session that we are currently creating.
-    customer_details: [
+    line_items: [
       {
         name: `${product.name} Product`,
         description: product.description,
@@ -50,7 +50,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
 const createBookingCheckout = async (session) => {
   const product = session.client_reference_id;
   const user = (await User.findOne({ email: session.customer_email })).id;
-  const price = session.customer_details[0].amount / 100;
+  const price = session.line_items[0].amount / 100;
   await Booking.create({ product, user, price });
 };
 
