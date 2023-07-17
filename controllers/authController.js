@@ -44,15 +44,9 @@ const createSendToken = (user, statusCode, request, response) => {
     httpOnly: true,
     secure: request.secure || request.headers('x-forwarded-proto') === 'https',
   });
-  if (process.env.NODE_ENV === 'production')
-    // IN PRODUCTION COOKIE TO SECURE
-    cookieOptions.secure = true;
-
-  // CREATE COOKIE (convert to milliseconds)
-  response.cookie('jwt', token, cookieOptions);
 
   // REMOVE PASSWORD FROM OUTPUT
-  this.password = undefined;
+  user.password = undefined;
 
   // SEND RESPONSE TO CLIENT
   response.status(statusCode).json({
@@ -73,15 +67,17 @@ const createSendToken = (user, statusCode, request, response) => {
  * catchAsync HANDLES CATCHING THE ERROR
  */
 exports.signup = catchAsync(async (request, response, next) => {
+  // CREATE NEW USER FROM USER SCHEMA
   const newUser = await User.create({
     name: request.body.name,
     email: request.body.email,
     password: request.body.password,
     passwordConfirm: request.body.passwordConfirm,
-    role: request.body.role,
   });
+
+  // GRAB URL FOR PROFILE VIEW (ME)
   const url = `${request.protocol}://${request.get('host')}/me`;
-  // console.log(url);
+
   // SEND EMAIL
   await new Email(newUser, url).sendWelcome();
   createSendToken(newUser, 201, request, response);
