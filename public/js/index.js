@@ -13,6 +13,8 @@ const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
 const bookBtn = document.getElementById('book-product');
 
+const signupForm = document.querySelector('.form--signup');
+
 if (loginForm)
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
