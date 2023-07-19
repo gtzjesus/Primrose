@@ -49,6 +49,6 @@ module.exports = class Email {
     await this.newTransport().sendMail(mailOptions);
   };
   sendWelcome = async function () {
-    await this.send('welcome', `Welcome to Natours ${this.firstName}!`);
+    await this.send('welcome', `Welcome to worldhello ${this.firstName}!`);
   };
 };

@@ -94,3 +94,9 @@ exports.updateUserData = catchAsync(async (request, response, next) => {
     user: updatedUser,
   });
 });
+
+exports.getSignUpForm = (req, res) => {
+  res.status(200).render('signup', {
+    title: `Create New Account`,
+  });
+};
