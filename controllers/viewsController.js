@@ -9,6 +9,14 @@ const Product = require('./../models/productModel');
 const AppError = require('../utils/appError');
 const Booking = require('./../models/bookingModel');
 
+exports.alerts = (request, response, next) => {
+  const { alert } = request.query;
+  if (alert == 'booking')
+    response.locals.alert =
+      "Your payment was successful! Please check your email for a confirmation. If your purchase doesn't show immediately, come back later!";
+  next();
+};
+
 exports.getOverview = catchAsync(async (request, response, next) => {
   // GET PRODUCT DATA FROM COLLECTION
   const products = await Product.find();

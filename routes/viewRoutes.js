@@ -8,6 +8,9 @@ const bookingController = require('./../controllers/bookingController');
 
 const router = express.Router();
 
+// MIDDLEWARE WILL RUN FOR ALL REQUESTS TO OUR WEB
+router.use(viewsController.alerts);
+
 router.get('/', authController.isLoggedIn, viewsController.getOverview);
 
 router.get(

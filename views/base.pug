@@ -7,7 +7,8 @@ html
             link(rel='stylesheet' href='/css/style.css')
             title Primrose 💐 | #{title}
 
-    body
+        // ALERT IN QUERY, response.locals available as variable
+    body(data-alert=`${alert ? alert : ''}`)
         // HEADER
         include _header
 
