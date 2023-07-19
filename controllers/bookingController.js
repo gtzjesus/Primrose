@@ -1,32 +1,27 @@
-/**
- * CONTROLLER LOGIC WHERE MANIPULATION
- * HAPPENS FOR ALL BOOKINGS (exports)
- */
-
-// IMPORTS
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const Product = require('./../models/productModel');
-const Booking = require('./../models/bookingModel');
-const factory = require('./handlerFactory');
-const catchAsync = require('../utils/catchAsync');
+const Product = require('../models/productModel');
 const User = require('../models/userModel');
+const Booking = require('../models/bookingModel');
+const catchAsync = require('../utils/catchAsync');
+const factory = require('./handlerFactory');
 
-// MIDDLEWARE USED TO RECEIVE PAYMENT FROM STRIPE
 exports.getCheckoutSession = catchAsync(async (req, res, next) => {
-  // 1) Get the currently booked product
+  // 1) Get the currently booked tour
   const product = await Product.findById(req.params.productId);
+  // console.log(product);
 
   // 2) Create checkout session
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
-    success_url: `${req.protocol}://${req.get('host')}`,
-    // success_url: `${req.protocol}://${req.get('host')}/my-products`,
+    success_url: `${req.protocol}://${req.get(
+      'host'
+    )}/my-products?alert=booking`,
     cancel_url: `${req.protocol}://${req.get('host')}/product/${product.slug}`,
     customer_email: req.user.email,
-    client_reference_id: req.params.productId, //this field allows us to pass in some data about this session that we are currently creating.
+    client_reference_id: req.params.productId,
     line_items: [
       {
-        name: `${product.name} Product`,
+        name: `${product.name} product`,
         description: product.description,
         images: [
           `${req.protocol}://${req.get('host')}/img/products/${
@@ -46,20 +41,18 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     session,
   });
 });
-// PRODUCTION FUNCTION; CREATE THAT PURCHASE/BOOKING
+
 const createBookingCheckout = async (session) => {
   const product = session.client_reference_id;
   const user = (await User.findOne({ email: session.customer_email })).id;
-  const price = session.line_items[0].amount / 100;
+  const price = session.amount_total / 100;
   await Booking.create({ product, user, price });
 };
 
-// STRIPE WEBOOK TO CREATE PURCHASE, FROM OUR FRONTEND
 exports.webhookCheckout = (req, res, next) => {
-  // ADDS HEADER TO REQUEST, CONTAINING SIGNATURE TO WEBHOOK (from stripe doc)
   const signature = req.headers['stripe-signature'];
-  let event;
 
+  let event;
   try {
     event = stripe.webhooks.constructEvent(
       req.body,
@@ -67,14 +60,12 @@ exports.webhookCheckout = (req, res, next) => {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
-    return res.status(400).send(`Webhook error : ${err.message}`);
+    return res.status(400).send(`Webhook error: ${err.message}`);
   }
 
-  // TEST IF IT IS EVENT
   if (event.type === 'checkout.session.completed')
-    // CREATE STRIPE EVENT
     createBookingCheckout(event.data.object);
-  //  SEND CONFIRMATION
+
   res.status(200).json({ received: true });
 };
 

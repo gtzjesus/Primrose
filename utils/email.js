@@ -1,28 +1,21 @@
 const nodemailer = require('nodemailer');
 const pug = require('pug');
-const { htmlToText } = require('html-to-text');
+const { htmlToText } = require('html-to-text'); // transforms the html to a text
 
 module.exports = class Email {
   constructor(user, url) {
     this.to = user.email;
     this.firstName = user.name.split(' ')[0];
     this.url = url;
-    this.from = `Jesus Gutierrez <${process.env.EMAIL_FROM}>`;
+    this.from = `Jonas <${process.env.EMAIL_FROM}>`;
   }
 
-  newTransport() {
-    if (process.env.NODE_ENV == 'production') {
-      // SENDGRID
-      return nodemailer.createTestAccount({
-        service: 'SendGrid',
-        auth: {
-          user: process.env.SENDGRID_USERNAME,
-          pass: process.env.SENDGRID_PASSWORD,
-        },
-      });
+  newTransport = function () {
+    if (process.env.NODE_ENV === 'production') {
+      return 1;
     }
-
     return nodemailer.createTransport({
+      //everything here is received from nodemailer.
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
       auth: {
@@ -30,10 +23,10 @@ module.exports = class Email {
         pass: process.env.EMAIL_PASSWORD,
       },
     });
-  }
+  };
 
-  async send(template, subject) {
-    // RENDER HTML BASED ON PUG
+  send = async function (template, subject) {
+    // 1) render HTML based on pug template
     const html = pug.renderFile(
       `${__dirname}/../views/emails/${template}.pug`,
       {
@@ -42,7 +35,8 @@ module.exports = class Email {
         subject,
       }
     );
-    // DEFINE EMAIL OPTIONS
+
+    // 2) define email options
     const mailOptions = {
       from: this.from,
       to: this.to,
@@ -50,18 +44,11 @@ module.exports = class Email {
       html,
       text: htmlToText(html),
     };
-    // CREATE TRANSPORT + SEND EMAIL
+
+    // 3) Create a transport to send email
     await this.newTransport().sendMail(mailOptions);
-  }
-
-  async sendWelcome() {
-    await this.send('welcome', 'Welcome to Primrose');
-  }
-
-  async sendPasswordReset() {
-    await this.send(
-      'passwordReset',
-      'Your password reset token (valid for 10 min)'
-    );
-  }
+  };
+  sendWelcome = async function () {
+    await this.send('welcome', `Welcome to Natours ${this.firstName}!`);
+  };
 };
